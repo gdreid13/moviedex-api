@@ -1,39 +1,51 @@
 require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
-const cors = require('cors')
+// const cors = require('cors')
 const app = express()
 // const helmet = require('helmet')
+const MOVIEDEX = require('./moviedex.json')
 
 console.log(process.env.API_TOKEN)
 
 app.use(morgan('dev'))
-app.use(cors())
-app.use((req, res) => {
-  res.send('Hello, you!')
-})
+// app.use(cors())
 
-/* app.use(ValidateBearerToken)
-
-function ValidateBearerToken(req, res, next) {
+app.use(function ValidateBearerToken(req, res, next) {
   const apiToken = process.env.API_TOKEN
   const authToken = req.get('Authorization')
 
-  if (!authToken || authToken.split(' ') [1] !== apiToken) {
-    console.log("unauthorized request: api token check failed")
-    return res.status(401).json({ error: 'Unauthorized request'})
-  }
-} */
-
-const validGenre = []
-const validCountry = []
-const validAvgVote = []
-
-/* function handleGetGenre(req, res) {
-  res.json(validGenre)
-}
+  console.log('validate bearer token middleware')
   
-app.get('/genres', handleGetGenre) */
+  if (!authToken || authToken.split(' ')[1] !== apiToken) {
+    return res.status(401).json({ error: 'Unauthorized request' })
+  }
+
+  next()
+})
+
+const validGenres = ['Animation', 'Drama', 'Romantic', 'Comedy', 'Spy', 'Crime', 'Thriller', 'Adventure', 'Documentary', 'Horror', 'Action', 'Western', 'History', 'Biography', 'Musical', 'Fantasy', 'War', 'Grotesque']
+
+const validCountry = []
+  
+app.get('/movie', function handleGetMovie(req, res) {
+  let response = MOVIEDEX;
+  if (req.query.genre) {
+    response = response.filter(movies => 
+      movies.genre.toLowerCase().includes(req.query.genre.toLowerCase())
+    )
+  }
+  if (req.query.country) {
+    response = response.filter(movies =>
+      movies.country.toLowerCase().includes(req.query.country.toLowerCase())
+    )
+  }
+/*   if (req.query.avg_vote) {
+    response = response.filter(movies =>
+      movies.avg_vote.includes(req.query.avg_vote)
+    )
+  } */
+})
 
 const PORT = 8200
 
