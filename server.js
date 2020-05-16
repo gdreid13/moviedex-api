@@ -1,15 +1,16 @@
 require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
-// const cors = require('cors')
+const cors = require('cors')
 const app = express()
-// const helmet = require('helmet')
+const helmet = require('helmet')
 const MOVIEDEX = require('./moviedex.json')
 
 console.log(process.env.API_TOKEN)
 
 app.use(morgan('dev'))
-// app.use(cors())
+app.use(cors())
+app.use(helmet())
 
 app.use(function ValidateBearerToken(req, res, next) {
   const apiToken = process.env.API_TOKEN
@@ -31,20 +32,22 @@ const validCountry = []
 app.get('/movie', function handleGetMovie(req, res) {
   let response = MOVIEDEX;
   if (req.query.genre) {
-    response = response.filter(movies => 
-      movies.genre.toLowerCase().includes(req.query.genre.toLowerCase())
+    response = response.filter(movie => 
+      movie.genre.toLowerCase().includes(req.query.genre.toLowerCase())
     )
   }
   if (req.query.country) {
-    response = response.filter(movies =>
-      movies.country.toLowerCase().includes(req.query.country.toLowerCase())
+    response = response.filter(movie =>
+      movie.country.toLowerCase().includes(req.query.country.toLowerCase())
     )
   }
-/*   if (req.query.avg_vote) {
-    response = response.filter(movies =>
-      movies.avg_vote.includes(req.query.avg_vote)
+   if (req.query.avg_vote) {
+    response = response.filter(movie =>
+      Number(movie.avg_vote) >= Number(req.query.avg_vote)
     )
-  } */
+  } 
+  
+  res.json(response)
 })
 
 const PORT = 8200
